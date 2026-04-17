@@ -1,0 +1,13 @@
+# Ignorar archivo de claves (MUY IMPORTANTE)
+.env
+
+# Ignorar carpeta de librerías de Python
+venv/
+__pycache__/
+
+# Ignorar Node y módulos frontend
+node_modules/
+dist/
+
+# Ignorar archivos de sistema
+.DS_Store
