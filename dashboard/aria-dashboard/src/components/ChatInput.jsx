@@ -32,7 +32,7 @@ export default function ChatInput({ clientPhone, onMessageSent }) {
       if (!res.ok) {
         console.error(`[ChatInput] Error del servidor: ${res.status} ${res.statusText}`)
         // Refetch de todas formas por si el mensaje se guardó parcialmente
-        setTimeout(() => onMessageSent?.(), 500)
+        setTimeout(() => onMessageSent?.(), 1000)
         return
       }
 
@@ -47,8 +47,10 @@ export default function ChatInput({ clientPhone, onMessageSent }) {
       if (data.status === 'error') {
         console.error('[ChatInput] El backend reportó un error al guardar el mensaje:', data.detalle)
       }
-      // Siempre refrescar el chat si el HTTP fue 2xx
-      setTimeout(() => onMessageSent?.(), 300)
+      // Refetch primario a 800ms — da tiempo al backend Railway de escribir en Supabase
+      setTimeout(() => onMessageSent?.(), 800)
+      // Refetch secundario a 2.5s — red de seguridad por si la primera llega antes que la escritura
+      setTimeout(() => onMessageSent?.(), 2500)
     } catch (err) {
       console.error('[ChatInput] No se pudo conectar con el servidor. ¿Está el backend corriendo?', err)
     } finally {
