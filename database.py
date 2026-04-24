@@ -52,7 +52,8 @@ async def guardar_cliente(mensaje_usuario, respuesta_bot, telefono, datos_extrai
         }
 
         if datos_extraidos.get("nombre_cliente"): datos_guardar["nombre_cliente"] = datos_extraidos["nombre_cliente"]
-        
+        if datos_extraidos.get("correo_cliente"): datos_guardar["correo"] = datos_extraidos["correo_cliente"]
+
         if datos_extraidos.get("tipo_inmueble"): datos_guardar["tipo_inmueble"] = datos_extraidos["tipo_inmueble"]
         if datos_extraidos.get("zona_municipio"): datos_guardar["zona_municipio"] = datos_extraidos["zona_municipio"]
         if datos_extraidos.get("presupuesto"): datos_guardar["presupuesto"] = str(datos_extraidos["presupuesto"])
@@ -120,9 +121,17 @@ def buscar_propiedades(tipo_inmueble, tipo_operacion, zona, presupuesto, recamar
 
         # Filtro de Zona
         if zona and zona.lower() != "sugerencias":
+            import re
             zona_limpia = str(zona).strip()
-            zona_busqueda = f"municipio.ilike.%{zona_limpia}%,colonia.ilike.%{zona_limpia}%,nombre.ilike.%{zona_limpia}%,descripcion.ilike.%{zona_limpia}%"
-            query = query.or_(zona_busqueda)
+            # Si la zona contiene conectores (del / de la / de), extraer el nombre base
+            # Ej: "San Juan del Río" → también buscar por "San Juan"
+            zona_base = re.split(r'\s+(?:del|de la|de los|de las|de)\s+',
+                                  zona_limpia, maxsplit=1, flags=re.IGNORECASE)[0].strip()
+            campos = ["municipio", "colonia", "nombre", "descripcion"]
+            filtros = [f"{c}.ilike.%{zona_limpia}%" for c in campos]
+            if zona_base.lower() != zona_limpia.lower():   # solo si realmente difiere
+                filtros += [f"{c}.ilike.%{zona_base}%" for c in campos]
+            query = query.or_(",".join(filtros))
 
         if recamaras is not None:
             query = query.or_(f"recamaras.gte.{recamaras},recamaras.is.null")

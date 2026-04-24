@@ -142,8 +142,11 @@ def enviar_mensaje_asesor(telefono: str, req: MensajeAsesorRequest):
                 "fecha_contacto": ahora.strftime("%Y-%m-%d"),
                 "hora_contacto": ahora.strftime("%H:%M:%S")
             }).eq("telefono", telefono).execute()
-    except Exception:
-        pass
+        else:
+            print(f"[WARN DASHBOARD] No se encontró cliente con teléfono {telefono} para guardar el mensaje del asesor.")
+    except Exception as e:
+        print(f"[ERROR DASHBOARD] Fallo al guardar mensaje del asesor en Supabase: {e}")
+        return {"status": "error", "detalle": f"Mensaje enviado pero no guardado en historial: {e}"}
     return {"status": "ok", "bot_encendido": False}
 
 # ==============================================================================
